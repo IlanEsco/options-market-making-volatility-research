@@ -57,3 +57,42 @@ def calculate_total_pnl(
         "total_equity": total_equity,
         "total_pnl": total_pnl,
     }
+
+def calculate_unrealized_pnl(
+    positions,
+    average_prices,
+    current_prices,
+    contract_multiplier=100,
+):
+    """
+    Calculate unrealized PnL for all open positions.
+
+    Long:
+        (current price - average price) × position × multiplier
+
+    Short:
+        The signed position automatically reverses the direction.
+    """
+
+    unrealized_pnl = 0.0
+
+    for symbol, position in positions.items():
+        if position == 0:
+            continue
+
+        if symbol not in current_prices:
+            raise KeyError(f"No current price found for {symbol}")
+
+        if symbol not in average_prices:
+            raise KeyError(f"No average price found for {symbol}")
+
+        unrealized_pnl += (
+            position
+            * (
+                float(current_prices[symbol])
+                - float(average_prices[symbol])
+            )
+            * contract_multiplier
+        )
+
+    return unrealized_pnl
